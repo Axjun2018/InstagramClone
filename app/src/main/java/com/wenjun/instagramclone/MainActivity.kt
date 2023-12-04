@@ -14,6 +14,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.wenjun.instagramclone.auth.LoginScreen
 import com.wenjun.instagramclone.auth.SignupScreen
 import com.wenjun.instagramclone.main.NotificationMessage
 import com.wenjun.instagramclone.ui.theme.InstagramCloneTheme
@@ -38,11 +39,13 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * sealed class restricts all child classes/objects only can extend DestinationScreen class
+ * sealed class restricts all child classes/objects only can extend DestinationScreen class.
+ * Routes collection class
  */
 sealed class DestinationScreen(val route: String){
     // Signup(Screen) is a singleton obj extends DestinationScreen() that can only have 1 at a time
     object Signup: DestinationScreen("signup")
+    object Login: DestinationScreen("login")
 }
 
 @Composable
@@ -57,6 +60,9 @@ fun InstagramApp(){
         // add all destination routes here:
         composable(DestinationScreen.Signup.route){
             SignupScreen(navController = navController, vm = vm)
+        }
+        composable(DestinationScreen.Login.route){
+            LoginScreen(navController = navController, vm = vm)
         }
     }
 }

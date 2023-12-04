@@ -1,5 +1,5 @@
 /**
- * Error handling UI, pop up error notification.
+ * Helper UIs and functions
  */
 package com.wenjun.instagramclone.main //main package: handle all events in MainActivity
 
@@ -16,8 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
+import com.wenjun.instagramclone.DestinationScreen
 import com.wenjun.instagramclone.IgViewModel
 
+/**
+ *  Error handling UI, pop up error notification.
+ */
 @Composable
 fun NotificationMessage(vm: IgViewModel){
     val notifState = vm.popupNotification.value //get notification state
@@ -42,5 +47,12 @@ fun CommonProgressSpinner() {
         verticalAlignment = Alignment.CenterVertically
     ){
         CircularProgressIndicator()
+    }
+}
+
+fun navigateTo(navController: NavController, dest: DestinationScreen){
+    navController.navigate(dest.route){
+        popUpTo(dest.route) //if user already launched the screen previously, pop all latest screen out of stack until desired one
+        launchSingleTop = true //ensure only launch the screen one time
     }
 }

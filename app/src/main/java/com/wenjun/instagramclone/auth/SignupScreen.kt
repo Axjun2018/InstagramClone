@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -29,9 +28,11 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.wenjun.instagramclone.DestinationScreen
 import com.wenjun.instagramclone.IgViewModel
 import com.wenjun.instagramclone.R
 import com.wenjun.instagramclone.main.CommonProgressSpinner
+import com.wenjun.instagramclone.main.navigateTo
 
 /**
  * SignupScreen composable passes nav status and view model
@@ -102,7 +103,9 @@ fun SignupScreen(navController: NavController, vm: IgViewModel){
                 color = Color.Blue,
                 modifier = Modifier
                     .padding(8.dp)
-                    .clickable { }
+                    .clickable { // click link to navigate to Login
+                        navigateTo(navController, DestinationScreen.Login)
+                    }
                 )
         }
 
