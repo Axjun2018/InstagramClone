@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.toObject
 import com.google.firebase.storage.FirebaseStorage
 import com.wenjun.instagramclone.data.Event
 import com.wenjun.instagramclone.data.UserData
@@ -28,6 +29,17 @@ class IgViewModel @Inject constructor(
     val inProgress = mutableStateOf(false) // flags if db operation is in progress or not
     val userData = mutableStateOf<UserData?>(null)
     val popupNotification = mutableStateOf<Event<String>?>(null) //handle event errors by checking the state of Event class instance
+
+    // Code inside init{...} block will be executed when an instance of IgViewModel is created
+    // It is part of the primary constructor
+    init { //if user signed in, get use data
+        // auth.signOut()
+        val currentUser = auth.currentUser // firebase auth remembers if current user signed in or not
+        signedIn.value = currentUser != null
+        currentUser?.uid?.let{ uid ->
+            getUserData(uid)
+        }
+    }
 
     fun onSignup(username: String, email: String, pass: String){
         inProgress.value = true
@@ -62,7 +74,7 @@ class IgViewModel @Inject constructor(
         imageUrl: String? = null
     ){
         val uid = auth.currentUser?.uid //get current user id: exist or null
-        val userData = UserData( //use passed info update, if passed null, get info from current user
+        val userData = UserData( //use passed info to update, if passed null, get info from current user
             userId = uid,
             name = name ?: userData.value?.name,
             username = username ?: userData.value?.username,
@@ -99,7 +111,18 @@ class IgViewModel @Inject constructor(
     }
 
     private fun getUserData(uid: String){
-
+        inProgress.value = true
+        db.collection(USERS).document(uid).get()
+            .addOnSuccessListener {// success to get user
+                val user = it.toObject<UserData>() // parse db data to UserData object
+                userData.value = user
+                inProgress.value = false
+                // popupNotification.value = Event("User data retrieved successfully") // test if signup lead user to sign in
+            }
+            .addOnFailureListener(){ exc -> //fail to get user: handle exception
+                handleException(exc, "Connot retrieve user data")
+                inProgress.value = false
+            }
     }
 
     fun handleException(exception: Exception? = null, customMessage: String = ""){
