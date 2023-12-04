@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -65,7 +66,8 @@ fun LoginScreen(navController: NavController, vm: IgViewModel){
                 text = "Login",
                 modifier = Modifier.padding(16.dp),
                 fontSize = 30.sp,
-                fontFamily = FontFamily.Serif
+                fontFamily = FontFamily.SansSerif,
+                fontWeight = FontWeight.Bold
             )
             OutlinedTextField(
                 value = emailState.value,
@@ -83,6 +85,7 @@ fun LoginScreen(navController: NavController, vm: IgViewModel){
             Button(onClick = { // clear the focus from any focused component when the "LOGIN" button is clicked
                 // ensure that the focus is not retained on any specific input field or other interactive element after a button is clicked.
                 focus.clearFocus(force = true) //clears the focus from any currently focused component: close keyboard here
+                vm.onLogin(emailState.value.text, passState.value.text) //use text: return string value, not toString(): converts entire obj to String, otherwise bad format
             },
                 modifier = Modifier.padding(8.dp)
             ) {

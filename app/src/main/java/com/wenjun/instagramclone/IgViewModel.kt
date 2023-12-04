@@ -33,7 +33,7 @@ class IgViewModel @Inject constructor(
     // Code inside init{...} block will be executed when an instance of IgViewModel is created
     // It is part of the primary constructor
     init { //if user signed in, get use data
-        // auth.signOut()
+        auth.signOut() // use to test
         val currentUser = auth.currentUser // firebase auth remembers if current user signed in or not
         signedIn.value = currentUser != null
         currentUser?.uid?.let{ uid ->
@@ -42,6 +42,12 @@ class IgViewModel @Inject constructor(
     }
 
     fun onSignup(username: String, email: String, pass: String){
+        // if any field is empty, pop error message
+        if(username.isEmpty() or email.isEmpty() or pass.isEmpty()){
+            handleException(customMessage = "Please fill in all fields")
+            return
+        }
+
         inProgress.value = true
         db.collection(USERS).whereEqualTo("username", username).get() //query method: get row data from users where field is username
             .addOnSuccessListener { documents -> //addOnSuccessListener: To be notified when the task succeeds
@@ -64,6 +70,34 @@ class IgViewModel @Inject constructor(
             }
             .addOnFailureListener(){ // addOnFailureListener: Task failed with an exception
 
+            }
+    }
+
+    fun onLogin(email: String, pass: String){
+        // if any field is empty, pop error message
+        if(email.isEmpty() or pass.isEmpty()){
+            handleException(customMessage = "Please fill in all fields")
+            return
+        }
+
+        inProgress.value = true
+        auth.signInWithEmailAndPassword(email, pass)
+            .addOnCompleteListener(){ task ->
+                if(task.isSuccessful){
+                    signedIn.value = true
+                    inProgress.value = false
+                    auth.currentUser?.uid?.let { uid ->
+                        handleException(customMessage = "Login Success") //use to test login
+                        getUserData(uid)
+                    }
+                }else{
+                    handleException(task.exception, "Login failed")
+                    inProgress.value = false
+                }
+            }
+            .addOnFailureListener(){exc ->
+                handleException(exc, "Login failed")
+                inProgress.value = false
             }
     }
 
