@@ -32,8 +32,8 @@ class IgViewModel @Inject constructor(
 
     // Code inside init{...} block will be executed when an instance of IgViewModel is created
     // It is part of the primary constructor
-    init { //if user signed in, get use data
-        // auth.signOut() // use to test signup/login
+    init { //if user signed in, get user data
+        // auth.signOut() // use to test signup/login/auto login
         val currentUser = auth.currentUser // firebase auth remembers if current user signed in or not
         signedIn.value = currentUser != null
         currentUser?.uid?.let{ uid ->

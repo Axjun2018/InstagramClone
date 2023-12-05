@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -54,5 +56,21 @@ fun navigateTo(navController: NavController, dest: DestinationScreen){
     navController.navigate(dest.route){
         popUpTo(dest.route) //if user already launched the screen previously, pop all latest screen out of stack until desired one
         launchSingleTop = true //ensure only launch the screen one time
+    }
+}
+
+/**
+ * If user signed in already, app will remember at every launch time, so the signed in used will be direct to Feed screen
+ */
+@Composable
+fun CheckSignedIn(navController: NavController, vm: IgViewModel){
+    val alreadyLoggedIn = remember { mutableStateOf(false) }
+    val signedIn = vm.signedIn.value
+    if(signedIn && !alreadyLoggedIn.value){
+        alreadyLoggedIn.value = true
+        navController.navigate(DestinationScreen.Feed.route){
+            popUpTo(0) //pop all screens to avoid going to login screen
+            launchSingleTop = true
+        }
     }
 }

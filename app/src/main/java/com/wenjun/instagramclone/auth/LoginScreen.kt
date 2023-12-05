@@ -33,12 +33,15 @@ import androidx.navigation.NavController
 import com.wenjun.instagramclone.DestinationScreen
 import com.wenjun.instagramclone.IgViewModel
 import com.wenjun.instagramclone.R
+import com.wenjun.instagramclone.main.CheckSignedIn
 import com.wenjun.instagramclone.main.CommonProgressSpinner
 import com.wenjun.instagramclone.main.navigateTo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navController: NavController, vm: IgViewModel){
+    CheckSignedIn(navController = navController, vm = vm) // if there is a signed-in user, direct to Feed
+
     // the focus variable is an instance of FocusManager obtained from LocalFocusManager.current.
     // the focus variable is used to interact with FocusManager
     val focus = LocalFocusManager.current  // used to close keyboard after clicked login button

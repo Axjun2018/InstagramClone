@@ -32,6 +32,7 @@ import androidx.navigation.NavController
 import com.wenjun.instagramclone.DestinationScreen
 import com.wenjun.instagramclone.IgViewModel
 import com.wenjun.instagramclone.R
+import com.wenjun.instagramclone.main.CheckSignedIn
 import com.wenjun.instagramclone.main.CommonProgressSpinner
 import com.wenjun.instagramclone.main.navigateTo
 
@@ -41,6 +42,8 @@ import com.wenjun.instagramclone.main.navigateTo
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignupScreen(navController: NavController, vm: IgViewModel){
+    CheckSignedIn(navController = navController, vm = vm) // if there is a signed-in user, direct to Feed
+
     val focus = LocalFocusManager.current // used to close keyboard after clicked signup button
 
     //Text(text = "SignupScreen") //test

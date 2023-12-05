@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.wenjun.instagramclone.auth.LoginScreen
 import com.wenjun.instagramclone.auth.SignupScreen
+import com.wenjun.instagramclone.main.FeedScreen
 import com.wenjun.instagramclone.main.NotificationMessage
 import com.wenjun.instagramclone.ui.theme.InstagramCloneTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -46,6 +47,7 @@ sealed class DestinationScreen(val route: String){
     // Signup(Screen) is a singleton obj extends DestinationScreen() that can only have 1 at a time
     object Signup: DestinationScreen("signup")
     object Login: DestinationScreen("login")
+    object Feed: DestinationScreen("Feed")
 }
 
 @Composable
@@ -63,6 +65,9 @@ fun InstagramApp(){
         }
         composable(DestinationScreen.Login.route){
             LoginScreen(navController = navController, vm = vm)
+        }
+        composable(DestinationScreen.Feed.route){
+            FeedScreen(navController = navController, vm = vm)
         }
     }
 }
