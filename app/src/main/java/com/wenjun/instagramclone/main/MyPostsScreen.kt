@@ -9,14 +9,13 @@ import androidx.navigation.NavController
 import com.wenjun.instagramclone.IgViewModel
 
 @Composable
-fun FeedScreen(navController: NavController, vm: IgViewModel){
-    // Text(text = "Feed Screen")
+fun MyPostsScreen(navController: NavController, vm: IgViewModel){
     Column(modifier = Modifier.fillMaxSize()){
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = "Feed screen")
+            Text(text = "MyPosts screen")
         }
         BottomNavigationMenu(
-            selectedItem = BottomNavigationItem.FEED,
+            selectedItem = BottomNavigationItem.POSTS,
             navController = navController
         )
     }
