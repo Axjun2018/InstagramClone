@@ -80,7 +80,7 @@ fun navigateTo(navController: NavController, dest: DestinationScreen){
 fun CheckSignedIn(navController: NavController, vm: IgViewModel){
     val alreadyLoggedIn = remember { mutableStateOf(false) }
     val signedIn = vm.signedIn.value
-    if(signedIn && !alreadyLoggedIn.value){
+    if(signedIn && !alreadyLoggedIn.value){ // if user signin at the first time, navigate to FeedScree
         alreadyLoggedIn.value = true
         navController.navigate(DestinationScreen.Feed.route){
             popUpTo(0) //pop all screens to avoid going to login screen
