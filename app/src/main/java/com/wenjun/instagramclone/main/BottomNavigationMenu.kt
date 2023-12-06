@@ -1,3 +1,6 @@
+/**
+ * Bottom Nav UI
+ */
 package com.wenjun.instagramclone.main
 
 import androidx.compose.foundation.Image
@@ -18,6 +21,7 @@ import androidx.navigation.NavController
 import com.wenjun.instagramclone.DestinationScreen
 import com.wenjun.instagramclone.R
 
+// define nav items in enum class
 enum class BottomNavigationItem(val icon: Int, val navDestination: DestinationScreen){
     // set ico and route for each bottom menu
     FEED(R.drawable.ic_home, DestinationScreen.Feed),
@@ -32,7 +36,7 @@ fun BottomNavigationMenu(selectedItem: BottomNavigationItem, navController: NavC
         .wrapContentHeight()
         .padding(top = 4.dp)
         .background(Color.White)
-    ){
+    ){// iterate nav item indices to display each nav item UI
         for(item in BottomNavigationItem.values()){
             Image(
                 painter = painterResource(id = item.icon), //item icon is from vector asset

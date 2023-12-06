@@ -46,9 +46,12 @@ class MainActivity : ComponentActivity() {
  * Routes collection class
  */
 sealed class DestinationScreen(val route: String){
+    // add screen routes
     // Signup(Screen) is a singleton obj extends DestinationScreen() that can only have 1 at a time
     object Signup: DestinationScreen("signup")
     object Login: DestinationScreen("login")
+
+    // add bottom nav items routes
     object Feed: DestinationScreen("Feed")
     object Search: DestinationScreen("Search")
     object MyPosts: DestinationScreen("MyPosts")
@@ -64,7 +67,7 @@ fun InstagramApp(){
 
     // nav screen starts from SignupScreen once we starts app
     NavHost(navController = navController, startDestination = DestinationScreen.Signup.route){
-        // add all destination routes here:
+        // add all destination routes here: Screens & Nav items
         composable(DestinationScreen.Signup.route){
             SignupScreen(navController = navController, vm = vm)
         }
