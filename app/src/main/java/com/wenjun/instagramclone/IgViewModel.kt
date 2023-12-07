@@ -4,10 +4,12 @@
 package com.wenjun.instagramclone
 
 import android.net.Uri
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.toObject
 import com.google.firebase.storage.FirebaseStorage
 import com.wenjun.instagramclone.data.Event
@@ -33,6 +35,10 @@ class IgViewModel @Inject constructor(
     val inProgress = mutableStateOf(false) // flags if db operation is in progress or not
     val userData = mutableStateOf<UserData?>(null)
     val popupNotification = mutableStateOf<Event<String>?>(null) //handle event errors by checking the state of Event class instance
+
+    // variables for retrieve posts
+    val refreshPostsProgress = mutableStateOf(false)
+    val posts = mutableStateOf<List<PostData>>(listOf())
 
     // Code inside init{...} block will be executed when an instance of IgViewModel is created
     // It is part of the primary constructor
@@ -161,6 +167,7 @@ class IgViewModel @Inject constructor(
                 userData.value = user
                 inProgress.value = false
                 // popupNotification.value = Event("User data retrieved successfully") // test if signup lead user to sign in
+                refreshPosts() //get user posts
             }
             .addOnFailureListener(){ exc -> //fail to get user: handle exception
                 handleException(exc, "Connot retrieve user data")
@@ -248,9 +255,10 @@ class IgViewModel @Inject constructor(
 
             // save into database
             db.collection(POSTS).document(postUuid).set(post)
-                .addOnSuccessListener {//if save successully
+                .addOnSuccessListener {//if save successfully
                     popupNotification.value = Event("Post successfully created.")
                     inProgress.value = false
+                    refreshPosts()    //after new post was added, refresh to display
                     onPostSuccess.invoke()
                 }
                 .addOnFailureListener { exc ->
@@ -262,5 +270,37 @@ class IgViewModel @Inject constructor(
             onLogout()
             inProgress.value = false
         }
+    }
+
+    private fun refreshPosts(){
+        val currentUid = auth.currentUser?.uid
+        if(currentUid != null){
+            refreshPostsProgress.value = true
+            db.collection(POSTS).whereEqualTo("userId", currentUid).get()
+                .addOnSuccessListener { documents ->
+                    convertPosts(documents, posts)
+                    refreshPostsProgress.value = false
+                }
+                .addOnFailureListener { exc ->
+                    handleException(exc, "Cannot fetch posts")
+                    refreshPostsProgress.value = false
+                }
+        }else{
+            handleException(customMessage = "Error: username is unavailable. Unable to refresh posts")
+            onLogout()
+        }
+    }
+
+    /**
+     * retrieve posts from db, convert them to List<PostData> structure
+     */
+    private fun convertPosts(documents: QuerySnapshot, outState: MutableState<List<PostData>>){
+        val newPosts = mutableListOf<PostData>()
+        documents.forEach { doc ->
+            val post = doc.toObject<PostData>()
+            newPosts.add(post)
+        }
+        val sortedPosts = newPosts.sortedByDescending {it.time}
+        outState.value = sortedPosts // assign sorted post to result
     }
 }
