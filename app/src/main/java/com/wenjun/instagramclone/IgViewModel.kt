@@ -3,6 +3,7 @@
  */
 package com.wenjun.instagramclone
 
+import android.net.Uri
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -12,6 +13,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.wenjun.instagramclone.data.Event
 import com.wenjun.instagramclone.data.UserData
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.util.UUID
 import javax.inject.Inject
 
 const val USERS = "users" //db table name
@@ -104,6 +106,7 @@ class IgViewModel @Inject constructor(
     /**
      * A private helper method
      * Use to create a new user or update current user
+     * store to userData collection
      */
     private fun createOrUpdateProfile( //uid is auto generated, so no need to create
         name: String? = null,
@@ -172,5 +175,35 @@ class IgViewModel @Inject constructor(
 
     fun updateProfileData(name: String, username: String, bio: String){
         createOrUpdateProfile(name, username, bio)
+    }
+
+    /**
+     * Private helper
+     * for both profile & post images
+     */
+    private fun uploadImage(uri: Uri, onSuccess: (Uri) -> Unit){
+        inProgress.value = true
+
+        // Creates a new StorageReference initialized at the root Firebase Storage location.
+        val storageRef = storage.reference // firebase storage is used to save assets, eg: image assets
+        val uuid = UUID.randomUUID()
+        val imageRef = storageRef.child("images/$uuid") // create a child location of current reference
+        val uploadTask = imageRef.putFile(uri) // Asynchronously uploads from a content URI to this StorageReference.
+
+        uploadTask
+            .addOnSuccessListener {// if uploadTask success,
+                val result = it.metadata?.reference?.downloadUrl
+                result?.addOnSuccessListener(onSuccess)
+            }
+            .addOnFailureListener(){exc ->
+                handleException(exc)
+                inProgress.value = false
+            }
+    }
+
+    fun uploadProfileImage(uri: Uri){
+        uploadImage(uri){
+            createOrUpdateProfile(imageUrl = it.toString())
+        }
     }
 }
