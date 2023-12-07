@@ -3,7 +3,6 @@ package com.wenjun.instagramclone.auth
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,7 +40,7 @@ import com.wenjun.instagramclone.main.CommonProgressSpinner
 import com.wenjun.instagramclone.main.navigateTo
 
 @Composable
-fun Profilescreen(navController: NavController, vm: IgViewModel){
+fun ProfileScreen(navController: NavController, vm: IgViewModel){
     val isLoading = vm.inProgress.value
     if(isLoading){
         CommonProgressSpinner()

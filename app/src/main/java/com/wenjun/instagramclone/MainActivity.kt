@@ -14,10 +14,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.wenjun.instagramclone.auth.LoginScreen
+import com.wenjun.instagramclone.auth.ProfileScreen
 import com.wenjun.instagramclone.auth.SignupScreen
-import com.wenjun.instagramclone.auth.Profilescreen
 import com.wenjun.instagramclone.main.FeedScreen
 import com.wenjun.instagramclone.main.MyPostsScreen
+import com.wenjun.instagramclone.main.NewPostScreen
 import com.wenjun.instagramclone.main.NotificationMessage
 import com.wenjun.instagramclone.main.SearchScreen
 import com.wenjun.instagramclone.ui.theme.InstagramCloneTheme
@@ -56,6 +57,9 @@ sealed class DestinationScreen(val route: String){
     object Search: DestinationScreen("search")
     object MyPosts: DestinationScreen("myposts")
     object Profile: DestinationScreen("profile")
+    object NewPost: DestinationScreen("newpost/{imageUri}"){
+        fun createRoute(uri: String) = "newpost/$uri"
+    }
 
 }
 
@@ -85,7 +89,13 @@ fun InstagramApp(){
             MyPostsScreen(navController = navController, vm = vm)
         }
         composable(DestinationScreen.Profile.route){
-            Profilescreen(navController = navController, vm = vm)
+            ProfileScreen(navController = navController, vm = vm)
+        }
+        composable(DestinationScreen.NewPost.route){navBackStackEntry ->
+            val imageUri = navBackStackEntry.arguments?.getString("imageUri") //abstract uri from nav arguments as string
+            imageUri?.let{// if imageUri is not null, navigate to NewPostScreen, pass imageUri as it
+                NewPostScreen(navController = navController, vm = vm, encodedUri = it)
+            }
         }
     }
 }

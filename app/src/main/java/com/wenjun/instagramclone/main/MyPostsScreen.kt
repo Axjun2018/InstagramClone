@@ -1,5 +1,8 @@
 package com.wenjun.instagramclone.main
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -31,6 +34,17 @@ import com.wenjun.instagramclone.R
 
 @Composable
 fun MyPostsScreen(navController: NavController, vm: IgViewModel){
+    // retrieve images from device and pass selected image to MyPostsScreen to display
+    val newPostImageLauncher = rememberLauncherForActivityResult( // registry a device activity, returns the launcher that can be used to start the activity
+        contract = ActivityResultContracts.GetContent(), //contract with standard Android activity: get content from device, in this case
+    ){uri -> //onResult = {} - the callback to be called on the main thread when activity result is available
+        uri?.let{
+            val encoded = Uri.encode(it.toString())
+            val route = DestinationScreen.NewPost.createRoute(encoded)
+            navController.navigate(route)
+        }
+    }
+
     val userData = vm.userData.value
     val isLoading = vm.inProgress.value
     
@@ -38,7 +52,7 @@ fun MyPostsScreen(navController: NavController, vm: IgViewModel){
         Column(modifier = Modifier.weight(1f)){
             Row {
                 ProfileImage(userData?.imageUrl){ // define trilling lambda in this block
-                    
+                    newPostImageLauncher.launch("image/*") // *: means for all image types
                 }
                 Text(
                     text = "15\nposts",
