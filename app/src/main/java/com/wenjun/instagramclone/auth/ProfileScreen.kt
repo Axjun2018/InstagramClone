@@ -62,7 +62,10 @@ fun Profilescreen(navController: NavController, vm: IgViewModel){
             onBioChange = { bio = it },
             onSave = { vm.updateProfileData(name, username, bio) },
             onBack = { navigateTo(navController = navController, DestinationScreen.MyPosts) },
-            onLogout = { }
+            onLogout = {
+                vm.onLogout()
+                navigateTo(navController = navController, DestinationScreen.Login)
+            }
         )
     }
 }
@@ -102,14 +105,12 @@ fun ProfileContent(
         CommonDivider()
 
         // user image
-//        Column(
+//        Column( //placeholder
 //            modifier = Modifier
 //                .height(200.dp)
 //                .fillMaxWidth()
 //                .background(Color.Gray)
-//        ){
-//
-//        }
+//        ){ }
         ProfileImage(imageUrl = imageUrl, vm = vm)
 
         CommonDivider()
