@@ -101,6 +101,10 @@ class IgViewModel @Inject constructor(
             }
     }
 
+    /**
+     * A private helper method
+     * Use to create a new user or update current user
+     */
     private fun createOrUpdateProfile( //uid is auto generated, so no need to create
         name: String? = null,
         username: String? = null,
@@ -164,5 +168,9 @@ class IgViewModel @Inject constructor(
         val errorMsg = exception?.localizedMessage ?: ""
         val message = if(customMessage.isEmpty()) errorMsg else "$customMessage: $errorMsg"
         popupNotification.value = Event(message)
+    }
+
+    fun updateProfileData(name: String, username: String, bio: String){
+        createOrUpdateProfile(name, username, bio)
     }
 }
