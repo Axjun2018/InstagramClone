@@ -11,12 +11,14 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObject
 import com.google.firebase.storage.FirebaseStorage
 import com.wenjun.instagramclone.data.Event
+import com.wenjun.instagramclone.data.PostData
 import com.wenjun.instagramclone.data.UserData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.UUID
 import javax.inject.Inject
 
 const val USERS = "users" //db table name
+const val POSTS = "posts"
 /**
  * Inject firebase services to ViewModel
  */
@@ -212,5 +214,53 @@ class IgViewModel @Inject constructor(
         signedIn.value = false
         userData.value = null
         popupNotification.value = Event("Logged out")
+    }
+
+    fun onNewPost(uri: Uri, description: String, onPostSuccess: () -> Unit){
+        uploadImage(uri){
+            onCreatePost(it, description, onPostSuccess)
+        }
+    }
+
+    /**
+     * Create post and upload to fire store
+     */
+    private fun onCreatePost(imageUrl: Uri, description: String, onPostSuccess: () -> Unit){
+        inProgress.value = true
+        val currentUid = auth.currentUser?.uid
+        val currentUsername = userData.value?.username
+        val currentUserImage = userData.value?.imageUrl
+
+        if(currentUid != null){ //if the uid exists
+            // generate a new UUID for post
+            val postUuid = UUID.randomUUID().toString()
+
+            // create PostData instance
+            val post = PostData(
+                postId = postUuid,
+                userId = currentUid,
+                username = currentUsername,
+                userImage = currentUserImage,
+                postImage = imageUrl.toString(),
+                postDescription = description,
+                time = System.currentTimeMillis()
+            )
+
+            // save into database
+            db.collection(POSTS).document(postUuid).set(post)
+                .addOnSuccessListener {//if save successully
+                    popupNotification.value = Event("Post successfully created.")
+                    inProgress.value = false
+                    onPostSuccess.invoke()
+                }
+                .addOnFailureListener { exc ->
+                    handleException(exc, "Unable to create post")
+                    inProgress.value = false
+                }
+        }else{ // else fail to save
+            handleException(customMessage = "Error: username unavailable. Unable to create post.")
+            onLogout()
+            inProgress.value = false
+        }
     }
 }

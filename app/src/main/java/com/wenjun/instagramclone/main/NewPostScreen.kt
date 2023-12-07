@@ -1,5 +1,6 @@
 package com.wenjun.instagramclone.main
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -52,7 +53,10 @@ fun NewPostScreen(navController: NavController, vm: IgViewModel, encodedUri: Str
             Text(text = "Cancel", modifier = Modifier.clickable{navController.popBackStack()}) // Cancel to go back previous page
             Text(text = "Post", modifier = Modifier.clickable {
                 focusManager.clearFocus() // close soft keyboard
-                // call the VM
+                // call the VM to upload post to fire store
+                vm.onNewPost(Uri.parse(imageUri), description){
+                    navController.popBackStack() // onPostSuccess, go to previous page
+                }
             })
         }
 
