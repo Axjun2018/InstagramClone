@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.wenjun.instagramclone.DestinationScreen
 import com.wenjun.instagramclone.IgViewModel
 import com.wenjun.instagramclone.R
 
@@ -69,7 +70,7 @@ fun MyPostsScreen(navController: NavController, vm: IgViewModel){
                 Text(text = userData?.bio ?: "") //means if bio is null, return ""
             }
             OutlinedButton(
-                onClick = { },
+                onClick = { navigateTo(navController, DestinationScreen.Profile) }, // click to go to ProfileScreen
                 modifier = Modifier
                     .padding(8.dp)
                     .fillMaxWidth(),
