@@ -36,12 +36,12 @@ import com.wenjun.instagramclone.IgViewModel
 fun NewPostScreen(navController: NavController, vm: IgViewModel, encodedUri: String){//uri need to be encoded to pass to navigation
     val imageUri by remember { mutableStateOf(encodedUri)}
     var description by rememberSaveable { mutableStateOf("") }
-    val scrollSatet = rememberScrollState()
+    val scrollState = rememberScrollState()
     val focusManager = LocalFocusManager.current
 
     Column(
         modifier = Modifier
-            .verticalScroll(scrollSatet)
+            .verticalScroll(scrollState)
             .fillMaxWidth()
     ){
         Row(
