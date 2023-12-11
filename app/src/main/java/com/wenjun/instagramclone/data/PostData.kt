@@ -11,7 +11,8 @@ data class PostData(
     val postImage: String? = null,
     val postDescription: String? = null,
     val time: Long? = null,
-    val likes: List<String>? = null // a list of userId that liked the post
+    val likes: List<String>? = null, // a list of userId that liked the post
+    val searchTerms: List<String>? = null // the list should be create when the post was created -> IgViewModel: OnCreatePost
 ): Parcelable {
     /** Interface for classes whose instances can be written to and restored from a Parcel:
      * We need to pass PostData through navigation, so PostData should be parsed.
@@ -27,6 +28,7 @@ data class PostData(
         parcel.readString(),
         parcel.readString(),
         parcel.readValue(Long::class.java.classLoader) as? Long,
+        parcel.createStringArrayList(),
         parcel.createStringArrayList()
     ) {
     }
@@ -40,6 +42,7 @@ data class PostData(
         parcel.writeString(postDescription)
         parcel.writeValue(time)
         parcel.writeStringList(likes)
+        parcel.writeStringList(searchTerms)
     }
 
     override fun describeContents(): Int {

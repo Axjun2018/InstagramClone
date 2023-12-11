@@ -1,3 +1,7 @@
+/**
+ * Firebase doesn't allow to search a string within a string
+ * so we have to split post description into individual keywords for search
+ */
 package com.wenjun.instagramclone.main
 
 import androidx.compose.foundation.layout.Column

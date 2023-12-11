@@ -272,6 +272,14 @@ class IgViewModel @Inject constructor(
             // generate a new UUID for post
             val postUuid = UUID.randomUUID().toString()
 
+            // exclude filler words
+            val fillerWords = listOf("the", "be", "to", "am", "is", "was", "of", "and", "or", "a", "an", "in", "it", "I'm", "i'm" )
+            // extract keywords
+            val searchTerms = description
+                .split(" ", ".", ",", "?", "!", "#", ":") // split post description by given symbol
+                .map { it.lowercase() } // map all keywords to lowercase
+                .filter { it.isNotEmpty() and !fillerWords.contains(it) } // filter the empty keywords or the words in fillerWords
+
             // create PostData instance
             val post = PostData(
                 postId = postUuid,
@@ -281,7 +289,8 @@ class IgViewModel @Inject constructor(
                 postImage = imageUrl.toString(),
                 postDescription = description,
                 time = System.currentTimeMillis(),
-                likes = listOf<String>()
+                likes = listOf<String>(),
+                searchTerms = searchTerms //assign keywords to search terms
             )
 
             // save into database
