@@ -41,8 +41,14 @@ class IgViewModel @Inject constructor(
     val refreshPostsProgress = mutableStateOf(false)
     val posts = mutableStateOf<List<PostData>>(listOf())
 
-    // Code inside init{...} block will be executed when an instance of IgViewModel is created
-    // It is part of the primary constructor
+    // variables for searched post
+    val searchedPost = mutableStateOf<List<PostData>>(listOf())
+    val searchedPostsProgress = mutableStateOf(false)
+
+    /**
+     * Code inside init{...} block will be executed when an instance of IgViewModel is created
+     * It is part of the primary constructor
+    */
     init { //if user signed in, get user data
         // auth.signOut() // use to test signup/login/auto login
         val currentUser = auth.currentUser // firebase auth remembers if current user signed in or not
@@ -332,7 +338,7 @@ class IgViewModel @Inject constructor(
     }
 
     /**
-     * retrieve posts from db, convert them to List<PostData> structure
+     * retrieve posts from db, convert them to mutableStateOf(List<PostData>) structure
      */
     private fun convertPosts(documents: QuerySnapshot, outState: MutableState<List<PostData>>){
         val newPosts = mutableListOf<PostData>()
@@ -342,5 +348,25 @@ class IgViewModel @Inject constructor(
         }
         val sortedPosts = newPosts.sortedByDescending {it.time}
         outState.value = sortedPosts // assign sorted post to result
+    }
+
+    /**
+     * Search screen functionality
+     */
+    fun searchPosts(searchTerm: String){
+        if(searchTerm.isNotEmpty()){
+            searchedPostsProgress.value = true
+            db.collection(POSTS) //field name: same with db, trim whitespace, convert to lowercase
+                .whereArrayContains("searchTerms", searchTerm.trim().lowercase())
+                .get()// get posts data by search terms
+                .addOnSuccessListener {//if get successful
+                    convertPosts(it, searchedPost) // convert post to mutable list data
+                    searchedPostsProgress.value = false // finish progress
+                } // if failed, handle exception
+                .addOnFailureListener {exc ->
+                    handleException(exc, "Cannot search posts")
+                    searchedPostsProgress.value = false
+                }
+        }
     }
 }
