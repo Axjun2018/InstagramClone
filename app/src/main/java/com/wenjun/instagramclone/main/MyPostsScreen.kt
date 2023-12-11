@@ -74,7 +74,7 @@ fun MyPostsScreen(navController: NavController, vm: IgViewModel){
     val userData = vm.userData.value
     val isLoading = vm.inProgress.value
     val postsLoading = vm.refreshPostsProgress.value // check if posts are refreshing
-    val posts = vm.posts.value //get current posts
+    val posts = vm.posts.value //get current posts from mutableStateOf<List<PostData>>
     
     Column {
         Column(modifier = Modifier.weight(1f)){
@@ -134,8 +134,14 @@ fun MyPostsScreen(navController: NavController, vm: IgViewModel){
                 postsLoading = postsLoading,
                 posts = posts,
                 modifier = Modifier.weight(1f).padding(1.dp).fillMaxSize()
-            ){
+            ){ post -> // each post navigate to different page
                 //onPostClick()
+                // println("MyPost: postDescription = " + post.postDescription) //postDescription showed
+                navigateTo(
+                    navController = navController, // stack top: mypost
+                    DestinationScreen.SinglePost,  // going to add: singlepost
+                    NavParam("post", post) // construct a NavParam, "post" as key name, post is a PostData value
+                )
             }
         }
         BottomNavigationMenu(

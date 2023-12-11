@@ -3,6 +3,10 @@
  */
 package com.wenjun.instagramclone.main //main package: handle all events in MainActivity
 
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.Parcelable
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -36,6 +40,7 @@ import coil.compose.rememberImagePainter
 import com.wenjun.instagramclone.DestinationScreen
 import com.wenjun.instagramclone.IgViewModel
 import com.wenjun.instagramclone.R
+import com.wenjun.instagramclone.data.PostData
 
 /**
  *  Error handling UI, pop up error notification.
@@ -67,11 +72,41 @@ fun CommonProgressSpinner() {
     }
 }
 
-fun navigateTo(navController: NavController, dest: DestinationScreen){
+/**
+ * Define a NavParam to pass nav parameters
+ */
+data class NavParam(
+    val name: String,  // name of data object to be sent to navigation
+    val value: Parcelable // value of data object to be sent to navigation
+)
+
+/**
+ * vararg: means the params are optional to pass
+ */
+fun navigateTo(navController: NavController, dest: DestinationScreen, vararg params: NavParam){ // we can pass as many nav params as we want
+    //println("previous route: ${navController.previousBackStackEntry?.destination?.route}")
+    //println("current route (navigateTo): ${navController.currentBackStackEntry?.destination?.route}") //mypost
+
+    // if there are any nav params in current entry, put them into parcelable to parse
+    for(param in params){
+        println("params to be added: ${param.value}") // pass
+        navController.currentBackStackEntry?.savedStateHandle?.set(param.name, param.value) //("post", post)
+        //println(navController.currentBackStackEntry?.arguments?.getParcelable<PostData>(param.name)?.postDescription)
+    }
+
+    // this function directs to MainActivity.kt -- NavHost(){composable(){}}
     navController.navigate(dest.route){
-        popUpTo(dest.route) //if user already launched the screen previously, pop all latest screen out of stack until desired one
+        popUpTo(dest.route)//if user already launched the screen previously, pop all latest screen out of stack until desired one
         launchSingleTop = true //ensure only launch the screen one time
     }
+
+    // TEST
+//    println("navigate to route (navigateTo): ${navController.currentBackStackEntry?.destination?.route}")
+//    val postData = navController
+//        .previousBackStackEntry
+//        ?.arguments
+//        ?.getParcelable<PostData>("post") // this function cannot get data: null
+//    println("get params: ${postData?.postDescription}") //null
 }
 
 /**

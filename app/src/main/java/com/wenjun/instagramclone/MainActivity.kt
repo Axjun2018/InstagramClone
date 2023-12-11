@@ -16,11 +16,13 @@ import androidx.navigation.compose.rememberNavController
 import com.wenjun.instagramclone.auth.LoginScreen
 import com.wenjun.instagramclone.auth.ProfileScreen
 import com.wenjun.instagramclone.auth.SignupScreen
+import com.wenjun.instagramclone.data.PostData
 import com.wenjun.instagramclone.main.FeedScreen
 import com.wenjun.instagramclone.main.MyPostsScreen
 import com.wenjun.instagramclone.main.NewPostScreen
 import com.wenjun.instagramclone.main.NotificationMessage
 import com.wenjun.instagramclone.main.SearchScreen
+import com.wenjun.instagramclone.main.SinglePostScreen
 import com.wenjun.instagramclone.ui.theme.InstagramCloneTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -57,9 +59,10 @@ sealed class DestinationScreen(val route: String){
     object Search: DestinationScreen("search")
     object MyPosts: DestinationScreen("myposts")
     object Profile: DestinationScreen("profile")
-    object NewPost: DestinationScreen("newpost/{imageUri}"){
+    object NewPost: DestinationScreen("newpost/{imageUri}"){ //Route Naming Convention: route should be lowercase, {variableCamelCase}
         fun createRoute(uri: String) = "newpost/$uri"
     }
+    object SinglePost: DestinationScreen("singlepost")
 
 }
 
@@ -73,7 +76,7 @@ fun InstagramApp(){
     // nav screen starts from SignupScreen once we starts app
     NavHost(navController = navController, startDestination = DestinationScreen.Signup.route){
         // add all destination routes here: Screens & Nav items
-        composable(DestinationScreen.Signup.route){
+        composable(DestinationScreen.Signup.route){// Signup is the object created above
             SignupScreen(navController = navController, vm = vm)
         }
         composable(DestinationScreen.Login.route){
@@ -96,6 +99,26 @@ fun InstagramApp(){
             imageUri?.let{// if imageUri is not null, navigate to NewPostScreen, pass imageUri as it
                 NewPostScreen(navController = navController, vm = vm, encodedUri = it)
             }
+        }
+        composable(DestinationScreen.SinglePost.route){
+            // println("MainActivity postData: " + navController.currentBackStackEntry?.arguments?.getParcelable<PostData>("post")?.postDescription) //null
+            // get nav args from previous stored entry
+            val postData = navController
+                .previousBackStackEntry //The previous visible NavBackStackEntry: mypost
+                ?.savedStateHandle
+                ?.get<PostData>("post") // get post data of NavParam from previous nav entry
+
+            //println("MainActivity postData: " + postData?.postId) //null
+
+            postData?.let {
+                SinglePostScreen(
+                    navController = navController,
+                    vm = vm,
+                    post = postData
+                )
+            }
+            // println("previous route (MainActivity): ${navController.previousBackStackEntry?.destination?.route}") //mypost
+            // println("current route (MainActivity): ${navController.currentBackStackEntry?.destination?.route}") //singlepost
         }
     }
 }
