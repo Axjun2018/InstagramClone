@@ -42,7 +42,7 @@ class IgViewModel @Inject constructor(
     val posts = mutableStateOf<List<PostData>>(listOf())
 
     // variables for searched post
-    val searchedPost = mutableStateOf<List<PostData>>(listOf())
+    val searchedPosts = mutableStateOf<List<PostData>>(listOf())
     val searchedPostsProgress = mutableStateOf(false)
 
     /**
@@ -360,7 +360,7 @@ class IgViewModel @Inject constructor(
                 .whereArrayContains("searchTerms", searchTerm.trim().lowercase())
                 .get()// get posts data by search terms
                 .addOnSuccessListener {//if get successful
-                    convertPosts(it, searchedPost) // convert post to mutable list data
+                    convertPosts(it, searchedPosts) // convert post to mutable list data
                     searchedPostsProgress.value = false // finish progress
                 } // if failed, handle exception
                 .addOnFailureListener {exc ->
