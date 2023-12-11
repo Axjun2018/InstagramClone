@@ -8,6 +8,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.toObject
@@ -213,7 +214,36 @@ class IgViewModel @Inject constructor(
     fun uploadProfileImage(uri: Uri){
         uploadImage(uri){
             createOrUpdateProfile(imageUrl = it.toString())
+            updatePostUserImageData(it.toString()) // after profile image was updated, the user image in single post should also be updated
         }
+    }
+
+    /**
+     * Bc firebase is NOSQL but not relational db, so we need extra step to update user icon in single post screen
+     */
+    private fun updatePostUserImageData(imageUrl: String){
+        val currentUid = auth.currentUser?.uid
+        db.collection(POSTS).whereEqualTo("userId", currentUid).get()
+            .addOnSuccessListener {
+                val posts = mutableStateOf<List<PostData>>(arrayListOf())
+                convertPosts(it, posts)
+                val refs = arrayListOf<DocumentReference>()
+                for (post in posts.value){
+                    post.postId?.let{ id ->
+                        refs.add(db.collection(POSTS).document(id))
+                    }
+                }
+                if (refs.isNotEmpty()){
+                    db.runBatch{ batch ->
+                        for(ref in refs){
+                            batch.update(ref, "userImage", imageUrl)
+                        }
+                    }
+                        .addOnSuccessListener {
+                            refreshPosts()
+                        }
+                }
+            }
     }
 
     fun onLogout(){
@@ -250,7 +280,8 @@ class IgViewModel @Inject constructor(
                 userImage = currentUserImage,
                 postImage = imageUrl.toString(),
                 postDescription = description,
-                time = System.currentTimeMillis()
+                time = System.currentTimeMillis(),
+                likes = listOf<String>()
             )
 
             // save into database
