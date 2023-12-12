@@ -438,4 +438,28 @@ class IgViewModel @Inject constructor(
             }
     }
 
+    fun onLikePost(postData: PostData) { //PostData contains likes
+        auth.currentUser?.uid?.let { userId -> //if current user exists
+            postData.likes?.let { likes -> // if post has likes
+                val newLikes = arrayListOf<String>() // create newLikes list
+                if(likes.contains(userId)){ // if the likes list contains current user itself
+                    newLikes.addAll(likes.filter{ userId != it }) // add all userId that's not current user to likes
+                }else{ // otherwise, add all userId who liked to newLikes
+                    newLikes.addAll(likes)
+                    newLikes.add(userId)
+                }
+                postData.postId?.let {  postId ->
+                    db.collection(POSTS).document(postId).update("likes", newLikes) //update likes field with newLikes data
+                        .addOnSuccessListener {
+                            postData.likes = newLikes
+                        }
+                        .addOnFailureListener { exc ->
+                            handleException(exc, "Unable to like post")
+                        }
+                }
+            }
+
+        }
+    }
+
 }
