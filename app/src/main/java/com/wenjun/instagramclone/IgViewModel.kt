@@ -45,6 +45,9 @@ class IgViewModel @Inject constructor(
     val searchedPosts = mutableStateOf<List<PostData>>(listOf())
     val searchedPostsProgress = mutableStateOf(false)
 
+    val postsFeed = mutableStateOf<List<PostData>>(listOf())
+    val postsFeedProgress = mutableStateOf(false)
+
     /**
      * Code inside init{...} block will be executed when an instance of IgViewModel is created
      * It is part of the primary constructor
@@ -175,6 +178,7 @@ class IgViewModel @Inject constructor(
                 inProgress.value = false
                 // popupNotification.value = Event("User data retrieved successfully") // test if signup lead user to sign in
                 refreshPosts() //get user posts
+                getPersonalizedFeed() //update feeds when retrieve user data: display followed posts
             }
             .addOnFailureListener(){ exc -> //fail to get user: handle exception
                 handleException(exc, "Connot retrieve user data")
@@ -258,6 +262,7 @@ class IgViewModel @Inject constructor(
         userData.value = null
         popupNotification.value = Event("Logged out")
         searchedPosts.value = listOf() // when logout, clear all searched posts
+        postsFeed.value = listOf() //  when logout, clear all feeds
     }
 
     fun onNewPost(uri: Uri, description: String, onPostSuccess: () -> Unit){
@@ -371,6 +376,9 @@ class IgViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Update followers for current user, and update userData
+     */
     fun onFollowClick(userId: String){
         auth.currentUser?.uid?.let{ currentUser ->  // if there is the current user
             val following = arrayListOf<String>() // get user's following list
@@ -388,4 +396,46 @@ class IgViewModel @Inject constructor(
                 }
         }
     }
+
+    private fun getPersonalizedFeed(){
+        val following = userData.value?.following
+        if(!following.isNullOrEmpty()){
+            postsFeedProgress.value = true
+            db.collection(POSTS).whereIn("userId", following).get() //get userId field in following list
+                .addOnSuccessListener {
+                    convertPosts(documents = it, outState = postsFeed)
+                    if(postsFeed.value.isEmpty()){ // if user has no following: no feeds, get general feed
+                        getGeneralFeed()
+                    }else{
+                        postsFeedProgress.value = false
+                    }
+                }
+                .addOnFailureListener{exc ->
+                    handleException(exc, "Cannot get personalized feed")
+                    postsFeedProgress.value = false
+                }
+        }else{
+            getGeneralFeed()
+        }
+    }
+
+    /**
+     * if use has no followers, return general feeds posted in last day
+     */
+    private fun getGeneralFeed(){
+        postsFeedProgress.value = true
+        val currentTime = System.currentTimeMillis()
+        val difference = 24 * 60 * 60 * 1000 // 1 day in millis
+        db.collection(POSTS).whereGreaterThan("time", currentTime - difference)
+            .get()
+            .addOnSuccessListener {
+                convertPosts(documents = it, outState = postsFeed)
+                postsFeedProgress.value = false
+            }
+            .addOnFailureListener{exc ->
+                handleException(exc, "Connot get feed")
+                postsFeedProgress.value = false
+            }
+    }
+
 }
