@@ -1,6 +1,8 @@
 package com.wenjun.instagramclone.main
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,15 +22,22 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.wenjun.instagramclone.DestinationScreen
 import com.wenjun.instagramclone.IgViewModel
 import com.wenjun.instagramclone.data.PostData
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun FeedScreen(navController: NavController, vm: IgViewModel){
@@ -110,8 +119,12 @@ fun PostsList(
 /**
  * single post UI
  */
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun Post(post: PostData, currentUserId: String, vm: IgViewModel, onPostClick: () -> Unit){
+    val likeAnimation = remember { mutableStateOf(false)}
+    val dislikeAnimation = remember { mutableStateOf(false) }
+
     Card(
         shape = RoundedCornerShape(corner = CornerSize(4.dp)),
         modifier = Modifier
@@ -139,8 +152,40 @@ fun Post(post: PostData, currentUserId: String, vm: IgViewModel, onPostClick: ()
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ){
-                val modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 150.dp)
+                val modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = 150.dp)
+                    .pointerInput(Unit) {
+                        detectTapGestures (
+                            onDoubleTap = {// double taps a post to like
+                                if(post.likes?.contains(currentUserId) == true){ // if current user already liked post, double tap to dislike
+                                    dislikeAnimation.value = true
+                                }else{ // otherwise, like the post
+                                    likeAnimation.value = true
+                                }
+                                vm.onLikePost(post) // update likes in db
+                            },
+                            onTap = {// single tap to go to single post screem
+                                onPostClick.invoke()
+                            }
+                        )
+                    }
                 CommonImage(data = post.postImage, modifier = modifier, contentScale = ContentScale.FillWidth)
+
+                if(likeAnimation.value){ // if like, launch a coroutine to display anime
+                    CoroutineScope(Dispatchers.Main).launch {
+                        delay(1000L) //delay 1 second
+                        likeAnimation.value = false
+                    }
+                    LikeAnimation()
+                }
+                if(dislikeAnimation.value){
+                    CoroutineScope(Dispatchers.Main).launch {
+                        delay(1000L) //delay 1 second
+                        dislikeAnimation.value = false
+                    }
+                    LikeAnimation(false)
+                }
             }
         }
     }
