@@ -17,6 +17,7 @@ import com.wenjun.instagramclone.auth.LoginScreen
 import com.wenjun.instagramclone.auth.ProfileScreen
 import com.wenjun.instagramclone.auth.SignupScreen
 import com.wenjun.instagramclone.data.PostData
+import com.wenjun.instagramclone.main.CommentsScreen
 import com.wenjun.instagramclone.main.FeedScreen
 import com.wenjun.instagramclone.main.MyPostsScreen
 import com.wenjun.instagramclone.main.NewPostScreen
@@ -59,10 +60,17 @@ sealed class DestinationScreen(val route: String){
     object Search: DestinationScreen("search")
     object MyPosts: DestinationScreen("myposts")
     object Profile: DestinationScreen("profile")
+
+    // new post's creation band with imageUri
     object NewPost: DestinationScreen("newpost/{imageUri}"){ //Route Naming Convention: route should be lowercase, {variableCamelCase}
         fun createRoute(uri: String) = "newpost/$uri"
     }
     object SinglePost: DestinationScreen("singlepost")
+
+    // new comment's creation band with postId
+    object Comments: DestinationScreen("comments/{postId}"){
+        fun createRoute(postId: String) = "comments/$postId"
+    }
 
 }
 
@@ -119,6 +127,10 @@ fun InstagramApp(){
             }
             // println("previous route (MainActivity): ${navController.previousBackStackEntry?.destination?.route}") //mypost
             // println("current route (MainActivity): ${navController.currentBackStackEntry?.destination?.route}") //singlepost
+        }
+        composable(DestinationScreen.Comments.route){navBackStackEntry ->
+            val postId = navBackStackEntry.arguments?.getString("postId")
+            postId?.let { CommentsScreen(navController = navController, vm = vm, postId = it) } //it: postId
         }
     }
 }
