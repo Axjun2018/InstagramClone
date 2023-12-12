@@ -120,7 +120,7 @@ fun CheckSignedIn(navController: NavController, vm: IgViewModel){
         alreadyLoggedIn.value = true
         navController.navigate(DestinationScreen.Feed.route){
             popUpTo(0) //pop all screens to avoid going to login screen
-            launchSingleTop = true
+            //launchSingleTop = true
         }
     }
 }
