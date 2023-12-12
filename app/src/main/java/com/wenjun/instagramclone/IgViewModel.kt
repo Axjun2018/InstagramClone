@@ -458,7 +458,6 @@ class IgViewModel @Inject constructor(
                         }
                 }
             }
-
         }
     }
 
