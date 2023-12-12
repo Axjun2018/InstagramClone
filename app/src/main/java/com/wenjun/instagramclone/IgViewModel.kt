@@ -53,6 +53,8 @@ class IgViewModel @Inject constructor(
     val comments = mutableStateOf<List<CommentData>>(listOf())
     val commentsProgress = mutableStateOf(false)
 
+    val followersSize = mutableStateOf(0)
+
     /**
      * Code inside init{...} block will be executed when an instance of IgViewModel is created
      * It is part of the primary constructor
@@ -184,6 +186,7 @@ class IgViewModel @Inject constructor(
                 // popupNotification.value = Event("User data retrieved successfully") // test if signup lead user to sign in
                 refreshPosts() //get user posts
                 getPersonalizedFeed() //update feeds when retrieve user data: display followed posts
+                getFollowers(user?.userId)
             }
             .addOnFailureListener(){ exc -> //fail to get user: handle exception
                 handleException(exc, "Connot retrieve user data")
@@ -507,6 +510,16 @@ class IgViewModel @Inject constructor(
             .addOnFailureListener {exc -> // if fail, handle exception
                 handleException(exc, "Cannot retrieve comments")
                 commentsProgress.value = false
+            }
+    }
+
+    private fun getFollowers(uid: String?){
+        db.collection(USERS).whereArrayContains("following", uid?:"").get() //get the same uid where existing in following
+            .addOnSuccessListener { documents ->
+                followersSize.value = documents.size()
+            }
+            .addOnFailureListener { exc ->
+                handleException(exc, "Cannot retrieve followers")
             }
     }
 }

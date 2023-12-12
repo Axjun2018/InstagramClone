@@ -75,6 +75,7 @@ fun MyPostsScreen(navController: NavController, vm: IgViewModel){
     val isLoading = vm.inProgress.value
     val postsLoading = vm.refreshPostsProgress.value // check if posts are refreshing
     val posts = vm.posts.value //get current posts from mutableStateOf<List<PostData>>
+    val followerSize = vm.followersSize.value
     
     Column {
         Column(modifier = Modifier.weight(1f)){
@@ -83,21 +84,21 @@ fun MyPostsScreen(navController: NavController, vm: IgViewModel){
                     newPostImageLauncher.launch("image/*") // *: means for all image types
                 }
                 Text(
-                    text = "15\nposts",
+                    text = "${posts.size}\nposts",
                     modifier = Modifier
                         .weight(1f)
                         .align(Alignment.CenterVertically),
                     textAlign = TextAlign.Center
                 )
                 Text(
-                    text = "54\nfollowers",
+                    text = "$followerSize\nfollowers",
                     modifier = Modifier
                         .weight(1f)
                         .align(Alignment.CenterVertically),
                     textAlign = TextAlign.Center
                 )
                 Text(
-                    text = "0\nfollowing",
+                    text = "${userData?.following?.size ?: 0}\nfollowing",
                     modifier = Modifier
                         .weight(1f)
                         .align(Alignment.CenterVertically),
