@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +35,12 @@ import com.wenjun.instagramclone.main.CommentsScreen
 @Composable
 fun SinglePostScreen(navController: NavController, vm: IgViewModel, post: PostData){
     // Text(text = post.postDescription ?: "No description available")
+
+    val comments = vm.comments.value  // for getting comments size later
+    LaunchedEffect(key1 = Unit) { // launch coroutine to get comments got from db once current component is launched
+        vm.getComments(post.postId)
+    }
+
     post.userId?.let{
         Column(modifier = Modifier
             .fillMaxWidth()
@@ -44,14 +51,14 @@ fun SinglePostScreen(navController: NavController, vm: IgViewModel, post: PostDa
 
             CommonDivider()
 
-            SinglePostDisplay(navController = navController, vm = vm, post = post)
+            SinglePostDisplay(navController = navController, vm = vm, post = post, nbComments = comments.size)
         }
     }
 }
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
-fun SinglePostDisplay(navController: NavController, vm: IgViewModel, post: PostData){
+fun SinglePostDisplay(navController: NavController, vm: IgViewModel, post: PostData, nbComments: Int){
     val userData = vm.userData.value //get userData from view model
     Box(modifier = Modifier
         .fillMaxWidth()
@@ -106,7 +113,7 @@ fun SinglePostDisplay(navController: NavController, vm: IgViewModel, post: PostD
     
     Row(modifier = Modifier.padding(8.dp)) {
         Text(
-            text = "10 comments",
+            text = "$nbComments comments",
             color = Color.Gray,
             modifier = Modifier
                 .padding(start = 8.dp)

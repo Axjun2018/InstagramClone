@@ -480,6 +480,7 @@ class IgViewModel @Inject constructor(
             db.collection(COMMENTS).document(commentId).set(comment)
                 .addOnSuccessListener {
                     // get existing comments
+                    getComments(postId)
                 }
                 .addOnFailureListener { exc ->
                     handleException(exc, "Cannot create comment")
@@ -487,4 +488,25 @@ class IgViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Retrieve comments from db
+     */
+    fun getComments(postId: String?){
+        commentsProgress.value = true // set dp progress to true
+        db.collection(COMMENTS).whereEqualTo("postId", postId).get() // get comments from db
+            .addOnSuccessListener { documents -> // if success
+                val newComments = mutableListOf<CommentData>() //initial a newComments to hold the live list data
+                documents.forEach { doc -> // map each comment to CommentData object
+                    val comment = doc.toObject<CommentData>()
+                    newComments.add(comment)  // add comment obj to newComments
+                }
+                val sortedComments = newComments.sortedByDescending { it.timestamp } // sort newComments by timestamp
+                comments.value = sortedComments // assign live list comments with sorted live list comments
+                commentsProgress.value = false // set db progress to false
+            }
+            .addOnFailureListener {exc -> // if fail, handle exception
+                handleException(exc, "Cannot retrieve comments")
+                commentsProgress.value = false
+            }
+    }
 }
