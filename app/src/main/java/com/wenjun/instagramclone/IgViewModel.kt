@@ -13,6 +13,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.toObject
 import com.google.firebase.storage.FirebaseStorage
+import com.wenjun.instagramclone.data.CommentData
 import com.wenjun.instagramclone.data.Event
 import com.wenjun.instagramclone.data.PostData
 import com.wenjun.instagramclone.data.UserData
@@ -22,6 +23,7 @@ import javax.inject.Inject
 
 const val USERS = "users" //db table name
 const val POSTS = "posts"
+const val COMMENTS = "comments"
 /**
  * Inject firebase services to ViewModel
  */
@@ -47,6 +49,9 @@ class IgViewModel @Inject constructor(
 
     val postsFeed = mutableStateOf<List<PostData>>(listOf())
     val postsFeedProgress = mutableStateOf(false)
+
+    val comments = mutableStateOf<List<CommentData>>(listOf())
+    val commentsProgress = mutableStateOf(false)
 
     /**
      * Code inside init{...} block will be executed when an instance of IgViewModel is created
@@ -263,6 +268,7 @@ class IgViewModel @Inject constructor(
         popupNotification.value = Event("Logged out")
         searchedPosts.value = listOf() // when logout, clear all searched posts
         postsFeed.value = listOf() //  when logout, clear all feeds
+        comments.value = listOf() //  when logout, clear all comments
     }
 
     fun onNewPost(uri: Uri, description: String, onPostSuccess: () -> Unit){
@@ -458,6 +464,26 @@ class IgViewModel @Inject constructor(
                         }
                 }
             }
+        }
+    }
+
+    fun createComment(postId: String, text: String){
+        userData.value?.username?.let { username ->  //use username to create comments
+            val commentId = UUID.randomUUID().toString()
+            val comment = CommentData(
+                commentId = commentId,
+                postId = postId,
+                username = username,
+                text = text,
+                timestamp = System.currentTimeMillis()
+            )
+            db.collection(COMMENTS).document(commentId).set(comment)
+                .addOnSuccessListener {
+                    // get existing comments
+                }
+                .addOnFailureListener { exc ->
+                    handleException(exc, "Cannot create comment")
+                }
         }
     }
 
