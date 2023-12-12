@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.wenjun.instagramclone.IgViewModel
 import com.wenjun.instagramclone.R
@@ -50,6 +51,7 @@ fun SinglePostScreen(navController: NavController, vm: IgViewModel, post: PostDa
     }
 }
 
+@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun SinglePostDisplay(navController: NavController, vm: IgViewModel, post: PostData){
     val userData = vm.userData.value //get userData from view model
@@ -66,12 +68,20 @@ fun SinglePostDisplay(navController: NavController, vm: IgViewModel, post: PostD
             Text(text = post.username ?: "")
             Text(text = ".", modifier = Modifier.padding(8.dp))
 
-            if(userData?.userId == post.userId){ // if the user is the same with the post user
+            if(userData?.userId == post.userId) { // if the user is the same with the post user
                 // current user's post. Don't show anything
-            }else{ //not current user, give a follow option
-                Text(text = "Follow", color = Color.Blue, modifier = Modifier.clickable {
-                    //follow a user
-                })
+            }else if(userData?.following?.contains(post.userId) == true){ // else if the user has followed current user, display Following
+                Text(
+                    text = "Following",
+                    color = Color.Gray,
+                    modifier = Modifier.clickable { vm.onFollowClick(post.userId!!) }
+                )
+            }else{ //not follow current user yet, give a follow option
+                Text(
+                    text = "Follow",
+                    color = Color.Blue,
+                    modifier = Modifier.clickable { vm.onFollowClick(post.userId!!) } //follow a user
+                )
             }
         }
     }
